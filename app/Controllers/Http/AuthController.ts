@@ -3,7 +3,8 @@ import User from 'App/Models/User'
 import { UserService } from 'App/Services/UserService'
 import Database from '@ioc:Adonis/Lucid/Database'
 import UserRegistrationRequestValidator from 'App/Validators/Auth/UserRegistrationRequestValidator'
-import UserVerificationRequestValidator from 'App/Validators/Auth/UserVerificationRequestValidator'
+import EmailVerificationRequestValidator from 'App/Validators/Auth/EmailVerificationRequestValidator'
+import ResendVerificationEmailRequestValidator from 'App/Validators/Auth/ResendVerificationEmailRequestValidator'
 
 export default class AuthController {
   public async register({ request, response }: HttpContextContract): Promise<void> {
@@ -27,18 +28,22 @@ export default class AuthController {
     }
   }
 
+  public async resendVerificationEmail({ request, response }: HttpContextContract): Promise<void> {
+    await request.validate(ResendVerificationEmailRequestValidator)
+    const user = await UserService.getUserByEmailOrFail(request.input('email'), false)
+    await UserService.sendUserVerificationEmail(user)
+    response.noContent()
+  }
+
   public async verify({ request, response }: HttpContextContract): Promise<void> {
-    await request.validate(UserVerificationRequestValidator)
+    await request.validate(EmailVerificationRequestValidator)
     const verificationCode = request.input('verificationCode')
     const verificationUri = request.input('verificationUri')
-    const user = await User.query()
-      .withScopes((query) => query.pending())
-      .where('email', request.input('email'))
-      .firstOrFail()
+    const user = await UserService.getUserByEmailOrFail(request.input('email'), false)
     const res = await UserService.verifyUser(user, verificationUri, verificationCode)
 
     if (res) {
-      response.ok('Your email is verified successfully.')
+      response.noContent()
     } else {
       response.notFound()
     }

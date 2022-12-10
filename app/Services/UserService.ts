@@ -59,4 +59,11 @@ export class UserService {
 
     return false
   }
+
+  public static getUserByEmailOrFail(email: string, verified = true): Promise<User> {
+    return User.query()
+      .withScopes((query) => (verified ? query.verified() : query.pending()))
+      .where('email', email)
+      .firstOrFail()
+  }
 }

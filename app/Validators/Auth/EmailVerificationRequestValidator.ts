@@ -1,7 +1,7 @@
 import { schema, rules, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
-export default class UserVerificationRequestValidator {
+export default class EmailVerificationRequestValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   public schema = schema.create({
@@ -16,5 +16,5 @@ export default class UserVerificationRequestValidator {
 
   public messages: CustomMessages = {}
 
-  public cacheKey = 'validation-schema:auth.verify'
+  public cacheKey = 'validation-schema:auth.verify-email'
 }
