@@ -5,6 +5,8 @@ import Database from '@ioc:Adonis/Lucid/Database'
 import UserRegistrationRequestValidator from 'App/Validators/Auth/UserRegistrationRequestValidator'
 import EmailVerificationRequestValidator from 'App/Validators/Auth/EmailVerificationRequestValidator'
 import ResendVerificationEmailRequestValidator from 'App/Validators/Auth/ResendVerificationEmailRequestValidator'
+import LoginRequestValidator from 'App/Validators/Auth/LoginRequestValidator'
+import Hash from '@ioc:Adonis/Core/Hash'
 
 export default class AuthController {
   public async register({ auth, request, response }: HttpContextContract): Promise<void> {
@@ -48,6 +50,20 @@ export default class AuthController {
       response.noContent()
     } else {
       response.notFound()
+    }
+  }
+
+  public async login({ auth, request, response }: HttpContextContract): Promise<void> {
+    await request.validate(LoginRequestValidator)
+    const email = request.input('email')
+    const password = request.input('password')
+    const user = await User.findByOrFail('email', email)
+
+    if (user.password && (await Hash.verify(user.password, password))) {
+      const res = await UserService.generateAuthTokens(user, auth)
+      response.ok(res)
+    } else {
+      response.badRequest("Email or password didn't match")
     }
   }
 }
