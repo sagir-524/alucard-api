@@ -7,7 +7,7 @@ import EmailVerificationRequestValidator from 'App/Validators/Auth/EmailVerifica
 import ResendVerificationEmailRequestValidator from 'App/Validators/Auth/ResendVerificationEmailRequestValidator'
 
 export default class AuthController {
-  public async register({ request, response }: HttpContextContract): Promise<void> {
+  public async register({ auth, request, response }: HttpContextContract): Promise<void> {
     await request.validate(UserRegistrationRequestValidator)
     const trx = await Database.transaction()
 
@@ -21,7 +21,9 @@ export default class AuthController {
 
       await UserService.sendUserVerificationEmail(user)
       await trx.commit()
-      response.ok(user)
+
+      const authenticatedResponse = UserService.generateAuthTokens(user, auth)
+      response.ok(authenticatedResponse)
     } catch {
       await trx.rollback()
       response.internalServerError()

@@ -1,7 +1,10 @@
+import { AuthContract } from '@ioc:Adonis/Addons/Auth'
 import Mail from '@ioc:Adonis/Addons/Mail'
 import Redis from '@ioc:Adonis/Addons/Redis'
 import { cuid } from '@ioc:Adonis/Core/Helpers'
 import User from 'App/Models/User'
+import Encryption from '@ioc:Adonis/Core/Encryption'
+import { AuthenticatedResponseDto } from 'App/Dtos/AuthenticatedResponse.Dto'
 
 export class UserService {
   private static getUserVerificationKey(userId: number): string {
@@ -27,7 +30,7 @@ export class UserService {
       this.getUserVerificationKey(user.id),
       JSON.stringify({ verificationCode, verificationUri }),
       'EX',
-      60 * 24 // expiring after 1 hour
+      60 * 60 // expiring after 1 hour
     )
 
     return Mail.sendLater((message) => {
@@ -65,5 +68,23 @@ export class UserService {
       .withScopes((query) => (verified ? query.verified() : query.pending()))
       .where('email', email)
       .firstOrFail()
+  }
+
+  private static getRefreshTokenKey(token: string): string {
+    return `refresh-token:token:${token}`
+  }
+
+  public static async generateAuthTokens(
+    user: User,
+    auth: AuthContract
+  ): Promise<AuthenticatedResponseDto> {
+    const refreshToken = cuid()
+    const token = await auth.use('api').generate(user, {
+      expiresIn: '30 mins',
+    })
+
+    // expiring after 1 day
+    await Redis.set(this.getRefreshTokenKey(token.token), refreshToken, 'EX', 60 * 60 * 24)
+    return { token: token.token, refreshToken: Encryption.encrypt(refreshToken), user }
   }
 }
