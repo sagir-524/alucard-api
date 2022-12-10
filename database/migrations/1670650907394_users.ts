@@ -9,7 +9,8 @@ export default class extends BaseSchema {
       table.string('firstname', 255).notNullable()
       table.string('lastname', 255).notNullable()
       table.string('email', 255).notNullable().unique()
-      table.string('password', 180)
+      table.string('password', 180).nullable().defaultTo(null)
+      table.boolean('verified').defaultTo(false)
       /**
        * Uses timestampz for PostgreSQL and DATETIME2 for MSSQL
        */
