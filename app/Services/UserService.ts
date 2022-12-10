@@ -78,13 +78,31 @@ export class UserService {
     user: User,
     auth: AuthContract
   ): Promise<AuthenticatedResponseDto> {
-    const refreshToken = cuid()
+    const refreshTokenId = cuid()
     const token = await auth.use('api').generate(user, {
       expiresIn: '30 mins',
     })
 
     // expiring after 1 day
-    await Redis.set(this.getRefreshTokenKey(token.token), refreshToken, 'EX', 60 * 60 * 24)
-    return { token: token.token, refreshToken: Encryption.encrypt(refreshToken), user }
+    await Redis.set(
+      this.getRefreshTokenKey(token.token),
+      JSON.stringify({ userId: user.id, refreshTokenId }),
+      'EX',
+      60 * 60 * 24
+    )
+    return { token: token.token, refreshToken: Encryption.encrypt(refreshTokenId), user }
+  }
+
+  public static async verifyRefreshToken(token: string, refreshToken: string): Promise<number> {
+    const res = await Redis.get(this.getRefreshTokenKey(token))
+
+    if (res) {
+      const { userId, refreshTokenId } = JSON.parse(res)
+      if (Encryption.decrypt(refreshToken) === refreshTokenId) {
+        return userId
+      }
+    }
+
+    return 0
   }
 }

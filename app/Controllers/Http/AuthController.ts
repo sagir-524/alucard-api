@@ -66,4 +66,17 @@ export default class AuthController {
       response.badRequest("Email or password didn't match")
     }
   }
+
+  public async refreshToken({ auth, request, response }: HttpContextContract): Promise<void> {
+    const token = request.header('Authorization', '').replace('Bearer ', '')
+    const refreshToken = request.input('refreshToken', '')
+    const userId = await UserService.verifyRefreshToken(token, refreshToken)
+
+    if (userId) {
+      const user = await User.findOrFail(userId)
+      response.ok(await UserService.generateAuthTokens(user, auth))
+    } else {
+      response.badRequest('Could not refresh authentication token')
+    }
+  }
 }
