@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  mysql:
+    container_name: adonis-api-mysql
+    image: mysql:8.0.31
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - alucard_mysql_volume:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: alucard
+      MYSQL_ROOT_PASSWORD: dracula
+    ports:
+      - 3306:3306
+
+  adminer:
+    container_name: aponis-api-adminer
+    image: adminer:4.8.1
+    restart: always
+    ports:
+      - 8080:8080
+
+  redis:
+    container_name: adonis-api-redis
+    image: redis:6-alpine
+    volumes:
+      - alucard_redis_volume:/data
+    ports:
+      - 6379:6379
+
+  app:
+    container_name: alucard-api
+    restart: always
+    depends_on:
+      - mysql
+      - redis
+    build:
+      context: .
+      target: dependencies
+    ports:
+      - ${PORT}:${PORT}
+      - 9229:9229
+    env_file:
+      - .env
+    environment:
+      - MYSQL_HOST=mysql
+      - REDIS_HOST=redis
+    volumes:
+      - ./:/home/node/app
+    command: dumb-init node ace serve --watch --node-args="--inspect=0.0.0.0"
+
+volumes:
+  alucard_mysql_volume:
+  alucard_redis_volume:
