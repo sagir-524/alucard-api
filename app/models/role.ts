@@ -1,9 +1,10 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, manyToMany } from '@adonisjs/lucid/orm'
+import { BaseModel, column, manyToMany, scope } from '@adonisjs/lucid/orm'
 import { type Optional } from '../utils/utility_types.js'
 import Permission from './permission.js'
 import { type ManyToMany } from '@adonisjs/lucid/types/relations'
 import User from './user.js'
+import { activeScope, archivedScope } from '../utils/model_utils.js'
 
 export default class Role extends BaseModel {
   @column({ isPrimary: true })
@@ -29,4 +30,7 @@ export default class Role extends BaseModel {
 
   @manyToMany(() => User, { pivotTable: 'role_user_pivots' })
   declare users: ManyToMany<typeof User>
+
+  static archived = archivedScope
+  static active = activeScope
 }

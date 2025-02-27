@@ -3,6 +3,7 @@ import { BaseModel, column, manyToMany } from '@adonisjs/lucid/orm'
 import { type Optional } from '../utils/utility_types.js'
 import Role from './role.js'
 import { type ManyToMany } from '@adonisjs/lucid/types/relations'
+import { activeScope, archivedScope } from '../utils/model_utils.js'
 
 export default class Permission extends BaseModel {
   @column({ isPrimary: true })
@@ -28,4 +29,7 @@ export default class Permission extends BaseModel {
 
   @manyToMany(() => Role, { pivotTable: 'permission_role_pivots' })
   declare roles: ManyToMany<typeof Role>
+
+  static archived = archivedScope
+  static active = activeScope
 }
