@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { type Optional } from '../utils/utility_types.js'
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -29,6 +30,6 @@ export default class User extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-  @column.dateTime({ autoCreate: false, autoUpdate: false })
-  declare deactivatedAt: DateTime | null
+  @column.dateTime()
+  declare deactivatedAt: Optional<DateTime>
 }
