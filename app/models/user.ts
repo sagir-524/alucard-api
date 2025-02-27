@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, manyToMany } from '@adonisjs/lucid/orm'
+import { BaseModel, column, manyToMany, scope } from '@adonisjs/lucid/orm'
 import { type Optional } from '../utils/utility_types.js'
 import Role from './role.js'
 import { type ManyToMany } from '@adonisjs/lucid/types/relations'
@@ -26,9 +26,6 @@ export default class User extends BaseModel {
   @column()
   declare isSuperAdmin: boolean
 
-  @column()
-  declare isEmailVerified: boolean
-
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
@@ -36,8 +33,14 @@ export default class User extends BaseModel {
   declare updatedAt: DateTime
 
   @column.dateTime()
+  declare emailVerifiedAt: Optional<DateTime>
+
+  @column.dateTime()
   declare deactivatedAt: Optional<DateTime>
 
   @manyToMany(() => Role, { pivotTable: 'role_user_pivots' })
   declare roles: ManyToMany<typeof Role>
+
+  static verified = scope((query) => query.whereNotNull('emailverifiedAt'))
+  static unverified = scope((query) => query.whereNull('emailVerifiedAt'))
 }

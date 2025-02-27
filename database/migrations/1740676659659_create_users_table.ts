@@ -12,9 +12,9 @@ export default class extends BaseSchema {
       table.string('password', 255)
       table.boolean('is_admin').defaultTo(false)
       table.boolean('is_super_admin').defaultTo(false)
-      table.boolean('is_email_verified').defaultTo(false)
       table.timestamp('created_at', { useTz: true, precision: 3 })
       table.timestamp('updated_at', { useTz: true, precision: 3 })
+      table.timestamp('email_verified_at', { useTz: true, precision: 3 }).nullable().defaultTo(null)
       table.timestamp('deactivated_at', { useTz: true, precision: 3 }).nullable().defaultTo(null)
     })
   }
