@@ -26,6 +26,9 @@ export default class User extends BaseModel {
   @column()
   declare isSuperAdmin: boolean
 
+  @column()
+  declare isEmailVerified: boolean
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
