@@ -7,4 +7,5 @@
 |
 */
 import './routes/auth_routes.js'
+import './routes/permission_routes.js'
 import './routes/role_routes.js'

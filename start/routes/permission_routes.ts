@@ -4,6 +4,7 @@ import router from '@adonisjs/core/services/router'
 router
   .group(() => {
     router.get('permissions', '#controllers/permissions_controller.index').as('index')
+    router.get('permissions/all', '#controllers/permissions_controller.all').as('all')
 
     router
       .delete('permissions/:id/archive', '#controllers/permissions_controller.archive')

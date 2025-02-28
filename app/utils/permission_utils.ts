@@ -2,9 +2,9 @@ import User from '#models/user'
 import db from '@adonisjs/lucid/services/db'
 
 export const hasPermissions = async (user: User, ...permissions: string[]): Promise<boolean> => {
-  // if (user.isSuperAdmin) {
-  //   return true
-  // }
+  if (user.isSuperAdmin) {
+    return true
+  }
 
   const dbPermissions = await db
     .query()

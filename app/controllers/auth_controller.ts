@@ -12,7 +12,7 @@ export default class AuthController {
     const { email, password } = await request.validateUsing(loginValidator)
     const user = await User.findBy('email', email)
 
-    if (!user || !hash.verify(user.password, password)) {
+    if (!user || !(await hash.verify(user.password, password))) {
       return response.badRequest({
         message: "Email or password didn't match",
       })
