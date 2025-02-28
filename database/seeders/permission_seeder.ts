@@ -40,7 +40,7 @@ export default class extends BaseSeeder {
   async run() {
     const existingPermissions = await Permission.query().select('key')
     const missingPermissions = this.#permissions.filter((permission) => {
-      return existingPermissions.find(({ key }) => key === permission.key)
+      return !existingPermissions.find(({ key }) => key !== permission.key)
     })
     const newlyCreatedPermissions = await Permission.createMany(missingPermissions)
     console.log(`Total ${newlyCreatedPermissions.length} new permissions created`)
