@@ -1,9 +1,10 @@
 import { DateTime } from 'luxon'
-import { BaseModel, beforeSave, column, manyToMany, scope } from '@adonisjs/lucid/orm'
+import { BaseModel, beforeSave, column, hasMany, manyToMany, scope } from '@adonisjs/lucid/orm'
 import { type Optional } from '../utils/utility_types.js'
 import Role from './role.js'
-import { type ManyToMany } from '@adonisjs/lucid/types/relations'
+import type { HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 import hash from '@adonisjs/core/services/hash'
+import RefreshToken from './refresh_token.js'
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -41,6 +42,9 @@ export default class User extends BaseModel {
 
   @manyToMany(() => Role, { pivotTable: 'role_user_pivots' })
   declare roles: ManyToMany<typeof Role>
+
+  @hasMany(() => RefreshToken)
+  declare refreshTokens: HasMany<typeof RefreshToken>
 
   static verified = scope((query) => query.whereNotNull('emailverifiedAt'))
   static unverified = scope((query) => query.whereNull('emailVerifiedAt'))
