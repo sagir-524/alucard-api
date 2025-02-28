@@ -1,8 +1,9 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, manyToMany, scope } from '@adonisjs/lucid/orm'
+import { BaseModel, beforeSave, column, manyToMany, scope } from '@adonisjs/lucid/orm'
 import { type Optional } from '../utils/utility_types.js'
 import Role from './role.js'
 import { type ManyToMany } from '@adonisjs/lucid/types/relations'
+import hash from '@adonisjs/core/services/hash'
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -43,4 +44,11 @@ export default class User extends BaseModel {
 
   static verified = scope((query) => query.whereNotNull('emailverifiedAt'))
   static unverified = scope((query) => query.whereNull('emailVerifiedAt'))
+
+  @beforeSave()
+  static async hashPassword(user: User) {
+    if (user.$dirty.password) {
+      user.password = await hash.make(user.password)
+    }
+  }
 }
