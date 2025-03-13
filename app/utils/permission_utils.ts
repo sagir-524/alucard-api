@@ -6,6 +6,10 @@ export const hasPermissions = async (user: User, ...permissions: string[]): Prom
     return true
   }
 
+  if (!user.isAdmin) {
+    return false
+  }
+
   const dbPermissions = await db
     .query()
     .from('role_user_pivots')

@@ -42,8 +42,4 @@ export default class AuthController {
       message: 'Token is either invalid or expired.',
     })
   }
-
-  async me({ auth }: HttpContext) {
-    return auth.use('jwt').user as User
-  }
 }
