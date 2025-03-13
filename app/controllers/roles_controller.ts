@@ -9,14 +9,6 @@ export default class RolesController {
     await bouncer.with('RolePolicy').authorize('create')
 
     const { name, description, permissions } = await request.validateUsing(roleValidator)
-    const dbPermissions = await Permission.query()
-      .withScopes((query) => query.active())
-      .whereIn('id', permissions)
-      .exec()
-
-    if (permissions.length !== dbPermissions.length) {
-      return response.badRequest({ message: 'Not all the permissions exists in the database.' })
-    }
 
     const trx = await db.transaction()
     try {
@@ -26,7 +18,26 @@ export default class RolesController {
       response.created()
     } catch {
       await trx.rollback()
-      response.badRequest()
+      response.internalServerError()
+    }
+  }
+
+  async update({ bouncer, request, response }: HttpContext) {
+    await bouncer.with('RolePolicy').authorize('update')
+    const role = await Role.query()
+      .withScopes((scopes) => scopes.active())
+      .where('id', request.param('id'))
+      .firstOrFail()
+
+    const { name, description, permissions } = await request.validateUsing(roleValidator)
+
+    const dbPermissions = await Permission.query()
+      .withScopes((query) => query.active())
+      .whereIn('id', permissions)
+      .exec()
+
+    if (permissions.length !== dbPermissions.length) {
+      return response.badRequest({ message: 'Not all the permissions exists in the database.' })
     }
   }
 }

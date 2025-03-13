@@ -11,4 +11,12 @@ export default class RolePolicy extends BasePolicy {
 
     return false
   }
+
+  update(user: User | null): AuthorizerResponse {
+    if (user) {
+      return hasPermissions(user, 'roles.update')
+    }
+
+    return false
+  }
 }
